@@ -1,3 +1,9 @@
 from django.contrib import admin
+from .models import Record
 
-# Register your models here.
+
+class ToDoAdmin(admin.ModelAdmin):
+    read_only = ('date',)
+
+
+admin.site.register(Record, ToDoAdmin)

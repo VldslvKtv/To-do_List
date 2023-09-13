@@ -1,8 +1,10 @@
 from django.db import IntegrityError
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.models import User
 from django.contrib.auth import login, logout, authenticate
+from .forms import RecordForm
+from .models import Record, EXECUTION_STATUS
 
 
 # Create your views here.
@@ -27,7 +29,8 @@ def signupuser(request):
 
 
 def current_todo(request):
-    return render(request, 'todo/current_todo.html', {'form': UserCreationForm()})
+    records = Record.objects.filter(user=request.user, status=EXECUTION_STATUS[1][0])  # user=request.user
+    return render(request, 'todo/current_todo.html', {'records': records})
 
 
 def loginuser(request):
@@ -39,13 +42,53 @@ def loginuser(request):
         user = authenticate(request, username=username, password=password)
         if user is None:
             return render(request, 'todo/loginuser.html', {'form': AuthenticationForm(),
-                                                           'error': 'Username and password did nit match'})
+                                                           'error': 'Username and password did not match'})
+        else:
+            login(request, user)
+            return redirect('current_todo')
 
 
 def logoutuser(request):
     if request.method == 'POST':
         logout(request)
         return redirect('home')
+
+
+def createtodo(request):
+    if request.method == 'GET':
+        return render(request, 'todo/createtodo.html', {'form': RecordForm()})
+    else:
+        try:
+            form = RecordForm(request.POST)
+            new_record = form.save(commit=False)
+            new_record.user = request.user
+            new_record.save()
+            return redirect('current_todo')
+        except ValueError:
+            return render(request, 'todo/createtodo.html', {'form': RecordForm(),
+                                                            'error': 'Incorrect data transmitted'})
+
+
+def viewrecord(request, record_pk):
+    record = get_object_or_404(Record, pk=record_pk, user=request.user)
+    if request.method == 'GET':
+        form = RecordForm(instance=record)
+        return render(request, 'todo/viewrecord.html', {'record': record, 'form': form})
+    else:
+        try:
+            form = RecordForm(request.POST, instance=record)
+            form.save()
+            return redirect('current_todo')
+        except ValueError:
+            return render(request, 'todo/viewrecord.html', {'form': RecordForm(),
+                                                            'error': 'Incorrect data transmitted'})
+
+
+def deleterecord(request, record_pk):
+    if request.method == 'POST':
+        record = get_object_or_404(Record, pk=record_pk, user=request.user)
+        record.delete()
+        return redirect('current_todo')
 
 
 def home(request):

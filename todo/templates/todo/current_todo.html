@@ -10,7 +10,17 @@
 
 {% block content %}
 
-poka chto tac
+<ul>
+    {% for record in records %}
+    <li>
+        <a href="{% url 'viewrecord' record.id %}">
+    {% if record.important %}<b>{% endif %}{{ record.title }}{% if record.important %}</b>{% endif %}
+    {% if record.description %} - {{ record.description }}{% endif %}
+    {{ record.status }}
+        </a>
+    </li>
+    {% endfor %}
+</ul>
 
 {% endblock %}
 </body>
