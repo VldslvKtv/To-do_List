@@ -33,4 +33,6 @@ urlpatterns = [
     path('current/', views.current_todo, name='current_todo'),
     path('record/<int:record_pk>/', views.viewrecord, name='viewrecord'),
     path('record/<int:record_pk>/delete', views.deleterecord, name='deleterecord'),
+    path('completed/', views.completedtodo, name='completedtodo'),
+
 ]

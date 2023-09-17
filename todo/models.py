@@ -14,7 +14,7 @@ EXECUTION_STATUS = [
 class Record(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True)
-    date = models.DateField(null=True, editable=False)
+    date = models.DateField(default=datetime.date.today())
     important = models.BooleanField(default=False)
     deadline = models.DateField(auto_now=False, null=True, blank=True)
     status = models.CharField(max_length=1, choices=EXECUTION_STATUS, default=EXECUTION_STATUS[1])

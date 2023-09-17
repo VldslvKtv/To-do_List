@@ -16,13 +16,14 @@
         <a href="{% url 'viewrecord' record.id %}">
     {% if record.important %}<b>{% endif %}{{ record.title }}{% if record.important %}</b>{% endif %}
     {% if record.description %} - {{ record.description }}{% endif %}
+    {{ record.deadline|date:'d F Y' }}
         </a>
     </li>
     {% endfor %}
 </ul>
 
-<form method="GET" action="{% url 'completedtodo' %}">
-    <button type="submit">Completed tasks</button>
+<form method="GET" action="{% url 'current_todo' %}">
+    <button type="submit">Active tasks</button>
 </form>
 
 {% endblock %}

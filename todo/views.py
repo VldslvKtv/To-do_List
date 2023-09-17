@@ -1,8 +1,10 @@
 from django.db import IntegrityError
+from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.models import User
 from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth.decorators import login_required
 from .forms import RecordForm
 from .models import Record, EXECUTION_STATUS
 
@@ -28,6 +30,7 @@ def signupuser(request):
                                                             'error': 'Password did not match.'})
 
 
+@login_required()
 def current_todo(request):
     records = Record.objects.filter(user=request.user, status=EXECUTION_STATUS[1][0])  # user=request.user
     return render(request, 'todo/current_todo.html', {'records': records})
@@ -48,12 +51,14 @@ def loginuser(request):
             return redirect('current_todo')
 
 
+@login_required()
 def logoutuser(request):
     if request.method == 'POST':
         logout(request)
         return redirect('home')
 
 
+@login_required()
 def createtodo(request):
     if request.method == 'GET':
         return render(request, 'todo/createtodo.html', {'form': RecordForm()})
@@ -69,6 +74,7 @@ def createtodo(request):
                                                             'error': 'Incorrect data transmitted'})
 
 
+@login_required()
 def viewrecord(request, record_pk):
     record = get_object_or_404(Record, pk=record_pk, user=request.user)
     if request.method == 'GET':
@@ -84,11 +90,20 @@ def viewrecord(request, record_pk):
                                                             'error': 'Incorrect data transmitted'})
 
 
+@login_required()
 def deleterecord(request, record_pk):
     if request.method == 'POST':
         record = get_object_or_404(Record, pk=record_pk, user=request.user)
         record.delete()
         return redirect('current_todo')
+
+
+@login_required()
+def completedtodo(request):
+    if request.method == 'GET':
+        records = Record.objects.filter(Q(user=request.user) & (Q(status=EXECUTION_STATUS[2][0]) |
+                                                                Q(status=EXECUTION_STATUS[0][0]))).order_by('deadline')
+        return render(request, 'todo/completedtodo.html', {'records': records})
 
 
 def home(request):

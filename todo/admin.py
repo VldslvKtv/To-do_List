@@ -3,7 +3,7 @@ from .models import Record
 
 
 class ToDoAdmin(admin.ModelAdmin):
-    read_only = ('date',)
+    readonly_fields = ('date',)
 
 
 admin.site.register(Record, ToDoAdmin)
